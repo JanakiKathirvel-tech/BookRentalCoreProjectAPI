@@ -32,21 +32,21 @@ namespace BookRental.BusinessLayer
             try
             {
                 Console.WriteLine("job started...");
-                //using (var scope = _serviceProvider.CreateScope())
-                //{
-                //    var rentalService = scope.ServiceProvider.GetRequiredService<RentalService>();
-                //    await rentalService.MarkOverdueRentalsAsync();
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var rentalService = scope.ServiceProvider.GetRequiredService<RentalService>();
+                    await rentalService.MarkOverdueRentalsAsync();
 
-                //    var overdueRentals = await rentalService.GetOverdueRentalsAsync();
+                    var overdueRentals = await rentalService.GetOverdueRentalsAsync();
 
-                //    foreach (var rental in overdueRentals)
-                //    {
-                //        // Assuming rental has UserEmail property
-                //        var emailBody = $"Dear Customer, your rental for {rental.Book.Title} is overdue.";
-                //        //  await _emailService.SendEmailAsync(rental.UserId, "Overdue Rental Notification", emailBody);
-                //        await _emailService.SendEmailAsync("janaki.kv2@gmail.com", "Overdue Rental Notification", emailBody);
-                //    }
-                //}
+                    foreach (var rental in overdueRentals)
+                    {
+                        // Assuming rental has UserEmail property
+                        var emailBody = $"Dear Customer, your rental for {rental.Book.Title} is overdue.";
+                        //  await _emailService.SendEmailAsync(rental.UserId, "Overdue Rental Notification", emailBody);
+                        await _emailService.SendEmailAsync("janaki.kv2@gmail.com", "Overdue Rental Notification", emailBody);
+                    }
+                }
             }
             catch (Exception ex)
             {

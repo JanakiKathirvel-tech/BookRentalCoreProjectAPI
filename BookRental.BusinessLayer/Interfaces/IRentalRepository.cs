@@ -16,12 +16,17 @@ namespace BookRental.BusinessLayer.Interfaces
         Task<Rental> ReturnBook(int returnId);
 
 
-        Task<IEnumerable<Rental>> GetAllRentalBooks();
+        Task<IEnumerable<RentalDTO>> GetAllRentalBooks();
 
         Task<Rental> GetRentalbyId(int rentalId);
 
+        Task MarkOverdueRentalsAsync();
 
-      
+        Task SendMailOverdueNotificationsAsync();
+
+
+
+
 
     }
 }

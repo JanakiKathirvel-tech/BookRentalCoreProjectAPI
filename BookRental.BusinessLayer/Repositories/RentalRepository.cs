@@ -1,5 +1,6 @@
 ﻿using BookRental.BusinessLayer.Interfaces;
 using BookRental.EFCore;
+using BookRental.EFCore.DTO;
 using BookRentalAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,12 @@ namespace BookRental.BusinessLayer.Repositories
     public class RentalRepository : IRentalRepository
     {
         private readonly BookRentalDBContext _context;
+        private readonly EmailService _emailService;
 
-        public RentalRepository(BookRentalDBContext appDbContext)
+        public RentalRepository(BookRentalDBContext appDbContext, EmailService emailService)
         {
             this._context = appDbContext;
+            _emailService = emailService;
         }      
 
 
@@ -45,23 +48,35 @@ namespace BookRental.BusinessLayer.Repositories
         }
 
 
-        public async Task<IEnumerable<Rental>> GetAllRentalBooks()
+        public async Task<IEnumerable<RentalDTO>> GetAllRentalBooks()
         {
             IQueryable<Rental> query = _context.Rentals;
 
-            return await query.ToListAsync();
+            var rentals = from b in query
+                          select new RentalDTO()
+                          {
+                              RentalId = b.RentalId,
+                              BookName = b.Book.Title,
+                              UserName = b.User.Name,
+                              RentalDate = b.RentalDate.ToString("yyyy-MM-dd hh:mm"),
+                              ReturnDate = b.ReturnDate != null? b.ReturnDate.ToString() : ""
+                        };
+
+            return await rentals.ToListAsync();
         }
 
         public async Task<Rental> GetRentalbyId(int rentalId)
         {
-            var rental = _context.Rentals.FindAsync(rentalId);
+            var rental = await _context.Rentals.FindAsync(rentalId);
             if (rental != null)
             {
-                return await rental;
+                return rental;
             }
             return null;
         }
 
+
+      
         public async Task<Rental> ReturnBook(int rentalId)
         {
             var rental = await _context.Rentals.FindAsync(rentalId);
@@ -81,10 +96,40 @@ namespace BookRental.BusinessLayer.Repositories
 
         }
 
+        public async Task MarkOverdueRentalsAsync()
+        {
+            var overdueRentals = await _context.Rentals
+                    .Where(r => !r.IsOverdue && r.ReturnDate == null && EF.Functions.DateDiffDay(r.RentalDate, DateTime.Now) > 14)
+                    .ToListAsync();
 
+            foreach (var rental in overdueRentals)
+             {
+                rental.IsOverdue = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SendMailOverdueNotificationsAsync()
+        {
+            var overdueRentals = await _context.Rentals
+                    .Where(r => r.IsOverdue) 
+                    .ToListAsync();          
+
+            foreach (var rental in overdueRentals)
+            {
+                // Assuming rental has UserEmail property
+                var emailBody = $"Dear Customer, your rental for {rental.BookId} is overdue.";
+                //  await _emailService.SendEmailAsync(rental.UserId, "Overdue Rental Notification", emailBody);
+                await _emailService.SendEmailAsync("KamalamMuthiah2016@gmail.com", "Overdue Rental Notification", emailBody);
+            }
+            await _context.SaveChangesAsync();
+        }
 
 
       
+
+
 
     }
 }

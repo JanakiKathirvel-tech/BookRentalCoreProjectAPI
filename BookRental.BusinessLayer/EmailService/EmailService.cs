@@ -1,6 +1,7 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.Extensions.Options;
+using MailKit.Security;
 
 namespace BookRental.BusinessLayer
 {
@@ -26,7 +27,7 @@ namespace BookRental.BusinessLayer
 
             using (var client = new SmtpClient())
             {
-                await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSSL);
+                await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(_smtpSettings.UserName, _smtpSettings.Password);
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);

@@ -21,5 +21,7 @@ namespace BookRentalAPI.Models
 
         public Book Book { get; set; }
 
+        public User User { get; set; }
+
     }
 }

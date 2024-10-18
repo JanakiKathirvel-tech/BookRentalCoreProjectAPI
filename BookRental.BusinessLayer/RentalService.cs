@@ -21,9 +21,8 @@ namespace BookRental.BusinessLayer
         public async Task MarkOverdueRentalsAsync()
         {
             var overdueRentals = await _context.Rentals
-                .Where(r => !r.IsOverdue && r.ReturnDate == null &&
-                            (DateTime.Now - r.RentalDate).TotalDays > 14)
-                .ToListAsync();
+                   .Where(r => !r.IsOverdue && r.ReturnDate == null && EF.Functions.DateDiffDay(r.RentalDate, DateTime.Now) > 14)
+                   .ToListAsync();
 
             foreach (var rental in overdueRentals)
             {

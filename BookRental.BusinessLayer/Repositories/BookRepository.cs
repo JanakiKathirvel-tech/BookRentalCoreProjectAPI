@@ -24,15 +24,9 @@ namespace BookRental.BusinessLayer.Repositories
         {
             IQueryable<Book> query = _context.Books;
 
-            //var query1 = (from b in _context.Books
-            //             join g in _context.Genres
-            //on b.GenreId equals g.GenreId into gj
-            //             from sub in gj.DefaultIfEmpty()
-            //             select b);
-
             if (!string.IsNullOrEmpty(name)  && !string.IsNullOrEmpty(genre))
             {
-                query = query.Where(e => e.Title.Contains(name) && e.Genre.GenreName.Contains(genre));
+                query = query.Where(e => e.Title.Contains(name) || e.Genre.GenreName.Contains(genre));
             }
 
             if (!string.IsNullOrEmpty(name))
@@ -128,5 +122,8 @@ namespace BookRental.BusinessLayer.Repositories
                 LeastPopularBook = leastPopularBook
             };
         }
+
+
+       
     }
 }
